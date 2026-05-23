@@ -116,7 +116,6 @@ export default function Timer() {
         mb={isFullscreen ? 12 : 8}
         transition="all 0.3s ease"
       >
-        {isOvertime ? "+" : ""}
         {formatTime(timeLeft)}
       </Box>
 
