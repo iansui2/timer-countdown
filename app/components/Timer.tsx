@@ -134,25 +134,14 @@ export default function Timer() {
 
       {/* TIMER DISPLAY */}
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        w="100%"
-        mb={8}
-        h={isFullscreen ? "100vh" : "auto"}
+        fontSize={isFullscreen ? "25rem" : { base: "5xl", md: "10rem", lg: "15rem" }}
+        fontWeight="extrabold"
+        lineHeight="1"
+        color={isOvertime ? "red.400" : "green.300"}
+        mb={isFullscreen ? 12 : 8}
+        transition="all 0.3s ease"
       >
-        <Box
-          fontSize={
-            isFullscreen
-              ? "clamp(8rem, 30vw, 40vh)" // 🔥 BIG + iPad optimized
-              : { base: "5xl", md: "10rem", lg: "15rem" }
-          }
-          fontWeight="extrabold"
-          lineHeight="1"
-          color={isOvertime ? "red.400" : "green.300"}
-        >
-          {formatTime(timeLeft)}
-        </Box>
+        {formatTime(timeLeft)}
       </Box>
 
       {/* INPUTS */}
