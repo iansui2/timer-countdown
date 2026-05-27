@@ -138,7 +138,7 @@ export default function Timer() {
         fontWeight="extrabold"
         lineHeight="1"
         color={isOvertime ? "red.400" : "green.300"}
-        mb={isFullscreen ? 12 : 8}
+        mb={4}
         transition="all 0.3s ease"
       >
         {formatTime(timeLeft)}
@@ -247,7 +247,7 @@ export default function Timer() {
 
       {/* EXIT FULLSCREEN */}
       {isFullscreen && (
-        <Box position="absolute" bottom="40px">
+        <Box position="absolute" bottom="20px">
           <Button
             variant="outline"
             onClick={toggleFullscreen}
