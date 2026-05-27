@@ -6,13 +6,12 @@ import {
   Checkbox,
   Flex,
   Heading,
-  HStack,
   Input,
   VStack,
   AlertRoot,
   AlertDescription,
   AlertTitle,
-  CloseButton
+  CloseButton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
@@ -25,20 +24,26 @@ export default function Timer() {
   const [isRunning, setIsRunning] = useState(false);
   const [isOvertime, setIsOvertime] = useState(false);
   const [allowOvertime, setAllowOvertime] = useState(true);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [error, setError] = useState<string>("");
   const [showError, setShowError] = useState(false);
 
+  // 🔥 error helper
+  const showErrorMessage = (msg: string) => {
+    setError(msg);
+    setShowError(true);
+
+    setTimeout(() => {
+      setShowError(false);
+    }, 5000);
+  };
+
+  // 🔥 start timer
   const startTimer = () => {
-    if (!hours && !minutes && !seconds) {
-      setError("Provide hours, minutes or seconds.");
-      setShowError(true);
-
-      // auto hide after 5 seconds
-      setTimeout(() => {
-        setShowError(false);
-      }, 5000);
-
+    if (hours === 0 && minutes === 0 && seconds === 0) {
+      showErrorMessage("Provide hours, minutes or seconds.");
       return;
     }
 
@@ -47,6 +52,7 @@ export default function Timer() {
     setIsRunning(true);
   };
 
+  // 🔥 countdown logic
   useEffect(() => {
     if (!isRunning) return;
 
@@ -70,6 +76,7 @@ export default function Timer() {
     return () => clearInterval(interval);
   }, [isRunning, allowOvertime]);
 
+  // 🔥 format time
   const formatTime = (t: number) => {
     const abs = Math.abs(t);
 
@@ -77,38 +84,31 @@ export default function Timer() {
     const m = Math.floor((abs % 3600) / 60);
     const s = abs % 60;
 
-    // 👉 If no hours, show MM:SS only
     if (h === 0) {
       return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     }
 
-    // 👉 Otherwise HH:MM:SS
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(
-      2,
-      "0"
-    )}:${String(s).padStart(2, "0")}`;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+      s
+    ).padStart(2, "0")}`;
   };
 
-  const toggleFullscreen = async () => {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
+  // 🔥 iOS-safe fullscreen (CSS-based)
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => !prev);
 
-      setHours(0);
-      setMinutes(0);
-      setSeconds(0);
-    } else {
-      await document.exitFullscreen();
-      setIsFullscreen(false);
-
-      setHours(0);
-      setMinutes(0);
-      setSeconds(0);
-    }
+    setHours(0);
+    setMinutes(0);
+    setSeconds(0);
   };
 
   return (
     <Flex
+      position={isFullscreen ? "fixed" : "relative"}
+      top="0"
+      left="0"
+      w="100vw"
+      h="100vh"
       minH="100vh"
       direction="column"
       align="center"
@@ -117,33 +117,34 @@ export default function Timer() {
       color="white"
       px={6}
       textAlign="center"
+      zIndex={isFullscreen ? 9999 : "auto"}
+      overflow="hidden"
     >
       {/* TITLE */}
-      {
-        !isFullscreen && (
-          <Heading
-            fontSize={{ base: "3xl", md: "5rem" }}
-            mb={8}
-            opacity={0.9}
-            letterSpacing="wide"
-          >
-            Timer Countdown
-          </Heading>
-        )
-      }
-
+      {!isFullscreen && (
+        <Heading
+          fontSize={{ base: "3xl", md: "5rem" }}
+          mb={8}
+          opacity={0.9}
+          letterSpacing="wide"
+        >
+          Timer Countdown
+        </Heading>
+      )}
 
       {/* TIMER DISPLAY */}
       <Box
         display="flex"
         alignItems="center"
         justifyContent="center"
-        height={isFullscreen ? "100vh" : "auto"}
+        w="100%"
+        mb={8}
+        h={isFullscreen ? "100vh" : "auto"}
       >
         <Box
           fontSize={
             isFullscreen
-              ? "clamp(10rem, 30vw, 40rem)"
+              ? "clamp(8rem, 30vw, 95vh)" // 🔥 BIG + iPad optimized
               : { base: "5xl", md: "10rem", lg: "15rem" }
           }
           fontWeight="extrabold"
@@ -154,7 +155,7 @@ export default function Timer() {
         </Box>
       </Box>
 
-      {/* INPUTS (hidden in fullscreen mode) */}
+      {/* INPUTS */}
       {!isFullscreen && (
         <VStack
           gap={6}
@@ -168,131 +169,103 @@ export default function Timer() {
           maxW="600px"
         >
           {/* TIME INPUTS */}
-          <HStack gap={4} w="full">
+          <Flex gap={4} w="full">
             <Input
               placeholder="Hours"
               type="number"
-              size="lg"
               textAlign="center"
               fontSize="xl"
               h="70px"
-              bg="whiteAlpha.100"
-              border="1px solid"
-              borderColor="whiteAlpha.300"
-              _focus={{
-                borderColor: "green.300",
-                boxShadow: "0 0 0 1px rgba(72, 187, 120, 0.6)",
-              }}
               onChange={(e) => setHours(Number(e.target.value || 0))}
             />
-
             <Input
               placeholder="Minutes"
               type="number"
-              size="lg"
               textAlign="center"
               fontSize="xl"
               h="70px"
-              bg="whiteAlpha.100"
-              border="1px solid"
-              borderColor="whiteAlpha.300"
-              _focus={{
-                borderColor: "green.300",
-                boxShadow: "0 0 0 1px rgba(72, 187, 120, 0.6)",
-              }}
               onChange={(e) => setMinutes(Number(e.target.value || 0))}
             />
-
             <Input
               placeholder="Seconds"
               type="number"
-              size="lg"
               textAlign="center"
               fontSize="xl"
               h="70px"
-              bg="whiteAlpha.100"
-              border="1px solid"
-              borderColor="whiteAlpha.300"
-              _focus={{
-                borderColor: "green.300",
-                boxShadow: "0 0 0 1px rgba(72, 187, 120, 0.6)",
-              }}
               onChange={(e) => setSeconds(Number(e.target.value || 0))}
             />
-          </HStack>
+          </Flex>
 
-          {/* BUTTONS */}
-          <HStack gap={4} w="full" justify="center">
+          {/* 🔥 RESPONSIVE BUTTONS (VERTICAL ON MOBILE) */}
+          <Flex
+            direction={{ base: "column", md: "row" }}
+            gap={4}
+            w="full"
+            justify="center"
+            align="center"
+          >
             <Button
               colorScheme="green"
-              size="lg"
-              px={10}
-              fontSize="lg"
-              fontWeight="bold"
               onClick={startTimer}
+              w={{ base: "full", md: "auto" }}
+              size="lg"
+              fontSize={{ base: "lg", md: "xl" }}
+              px={{ base: 10, md: 8 }}
+              py={{ base: 7, md: 6 }}
+              borderRadius="xl"
             >
               Start
             </Button>
 
             <Button
               colorScheme="yellow"
-              size="lg"
-              px={10}
-              fontSize="lg"
-              fontWeight="bold"
               onClick={() => setIsRunning(false)}
+              w={{ base: "full", md: "auto" }}
+              size="lg"
+              fontSize={{ base: "lg", md: "xl" }}
+              px={{ base: 10, md: 8 }}
+              py={{ base: 7, md: 6 }}
+              borderRadius="xl"
             >
               Pause
             </Button>
 
             <Button
-              size="lg"
-              px={10}
-              fontSize="lg"
-              borderColor="whiteAlpha.300"
-              _hover={{ bg: "whiteAlpha.100" }}
               onClick={toggleFullscreen}
+              w={{ base: "full", md: "auto" }}
+              size="lg"
+              fontSize={{ base: "lg", md: "xl" }}
+              px={{ base: 10, md: 8 }}
+              py={{ base: 7, md: 6 }}
+              borderRadius="xl"
+              variant="outline"
             >
               Fullscreen
             </Button>
-          </HStack>
+          </Flex>
 
-          {/* CHECKBOX */}
-          <HStack gap={3} justify="center">
-            <Checkbox.Root
-              checked={allowOvertime}
-              onCheckedChange={(details) =>
-                setAllowOvertime(!!details.checked)
-              }
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control
-                borderColor="whiteAlpha.400"
-                _checked={{ bg: "red.400", borderColor: "red.400" }}
-              />
-              <Checkbox.Label fontSize="md" opacity={0.9}>
-                Allow Overtime
-              </Checkbox.Label>
-            </Checkbox.Root>
-          </HStack>
+          {/* OVERTIME CHECKBOX */}
+          <Checkbox.Root
+            checked={allowOvertime}
+            onCheckedChange={(d) => setAllowOvertime(!!d.checked)}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>Allow Overtime</Checkbox.Label>
+          </Checkbox.Root>
         </VStack>
       )}
 
-      {/* FULLSCREEN EXIT BUTTON */}
+      {/* EXIT FULLSCREEN */}
       {isFullscreen && (
         <Box position="absolute" bottom="40px">
-          <Button
-            variant="outline"
-            size="lg"
-            opacity={0.7}
-            _hover={{ opacity: 1 }}
-            onClick={toggleFullscreen}
-          >
+          <Button variant="outline" onClick={toggleFullscreen} opacity={0.7}>
             Exit Fullscreen
           </Button>
         </Box>
       )}
 
+      {/* ERROR ALERT */}
       {showError && (
         <Box position="fixed" top="20px" right="20px" zIndex="9999">
           <AlertRoot
@@ -304,16 +277,13 @@ export default function Timer() {
             maxW="300px"
           >
             <Box flex="1">
-              <AlertTitle mb="2" fontSize="sm">Missing input</AlertTitle>
+              <AlertTitle fontSize="sm">Missing input</AlertTitle>
               <AlertDescription fontSize="xs">
                 {error}
               </AlertDescription>
             </Box>
 
-            <CloseButton
-              size="sm"
-              onClick={() => setShowError(false)}
-            />
+            <CloseButton onClick={() => setShowError(false)} />
           </AlertRoot>
         </Box>
       )}
