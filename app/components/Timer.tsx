@@ -144,7 +144,7 @@ export default function Timer() {
         <Box
           fontSize={
             isFullscreen
-              ? "clamp(8rem, 30vw, 60vh)" // 🔥 BIG + iPad optimized
+              ? "clamp(8rem, 30vw, 40vh)" // 🔥 BIG + iPad optimized
               : { base: "5xl", md: "10rem", lg: "15rem" }
           }
           fontWeight="extrabold"
