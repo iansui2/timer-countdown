@@ -259,7 +259,17 @@ export default function Timer() {
       {/* EXIT FULLSCREEN */}
       {isFullscreen && (
         <Box position="absolute" bottom="40px">
-          <Button variant="outline" onClick={toggleFullscreen} opacity={0.7}>
+          <Button
+            variant="outline"
+            onClick={toggleFullscreen}
+            opacity={0.9}
+            size="lg"
+            px={10}
+            py={6}
+            borderRadius="xl"
+            bg="blackAlpha.600"
+            backdropFilter="blur(10px)"
+          >
             Exit Fullscreen
           </Button>
         </Box>
