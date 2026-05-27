@@ -138,7 +138,7 @@ export default function Timer() {
         fontWeight="extrabold"
         lineHeight="1"
         color={isOvertime ? "red.400" : "green.300"}
-        mb={4}
+        mb={isFullscreen ? 12 : 8}
         transition="all 0.3s ease"
       >
         {formatTime(timeLeft)}
@@ -245,19 +245,15 @@ export default function Timer() {
         </VStack>
       )}
 
-      {/* EXIT FULLSCREEN */}
+      {/* FULLSCREEN EXIT BUTTON */}
       {isFullscreen && (
-        <Box position="absolute" bottom="20px">
+        <Box position="absolute" bottom="40px">
           <Button
             variant="outline"
-            onClick={toggleFullscreen}
-            opacity={0.9}
             size="lg"
-            px={10}
-            py={6}
-            borderRadius="xl"
-            bg="blackAlpha.600"
-            backdropFilter="blur(10px)"
+            opacity={0.7}
+            _hover={{ opacity: 1 }}
+            onClick={toggleFullscreen}
           >
             Exit Fullscreen
           </Button>
