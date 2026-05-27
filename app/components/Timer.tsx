@@ -9,6 +9,10 @@ import {
   HStack,
   Input,
   VStack,
+  AlertRoot,
+  AlertDescription,
+  AlertTitle,
+  CloseButton
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
@@ -22,8 +26,22 @@ export default function Timer() {
   const [isOvertime, setIsOvertime] = useState(false);
   const [allowOvertime, setAllowOvertime] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [showError, setShowError] = useState(false);
 
   const startTimer = () => {
+    if (!hours && !minutes && !seconds) {
+      setError("Provide hours, minutes or seconds.");
+      setShowError(true);
+
+      // auto hide after 5 seconds
+      setTimeout(() => {
+        setShowError(false);
+      }, 5000);
+
+      return;
+    }
+
     setTimeLeft(hours * 3600 + minutes * 60 + seconds);
     setIsOvertime(false);
     setIsRunning(true);
@@ -75,9 +93,17 @@ export default function Timer() {
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen();
       setIsFullscreen(true);
+
+      setHours(0);
+      setMinutes(0);
+      setSeconds(0);
     } else {
       await document.exitFullscreen();
       setIsFullscreen(false);
+
+      setHours(0);
+      setMinutes(0);
+      setSeconds(0);
     }
   };
 
@@ -109,14 +135,23 @@ export default function Timer() {
 
       {/* TIMER DISPLAY */}
       <Box
-        fontSize={isFullscreen ? "25rem" : { base: "5xl", md: "10rem", lg: "15rem" }}
-        fontWeight="extrabold"
-        lineHeight="1"
-        color={isOvertime ? "red.400" : "green.300"}
-        mb={isFullscreen ? 12 : 8}
-        transition="all 0.3s ease"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        height={isFullscreen ? "100vh" : "auto"}
       >
-        {formatTime(timeLeft)}
+        <Box
+          fontSize={
+            isFullscreen
+              ? "clamp(10rem, 30vw, 40rem)"
+              : { base: "5xl", md: "10rem", lg: "15rem" }
+          }
+          fontWeight="extrabold"
+          lineHeight="1"
+          color={isOvertime ? "red.400" : "green.300"}
+        >
+          {formatTime(timeLeft)}
+        </Box>
       </Box>
 
       {/* INPUTS (hidden in fullscreen mode) */}
@@ -255,6 +290,31 @@ export default function Timer() {
           >
             Exit Fullscreen
           </Button>
+        </Box>
+      )}
+
+      {showError && (
+        <Box position="fixed" top="20px" right="20px" zIndex="9999">
+          <AlertRoot
+            status="warning"
+            size="sm"
+            variant="subtle"
+            borderRadius="md"
+            boxShadow="lg"
+            maxW="300px"
+          >
+            <Box flex="1">
+              <AlertTitle mb="2" fontSize="sm">Missing input</AlertTitle>
+              <AlertDescription fontSize="xs">
+                {error}
+              </AlertDescription>
+            </Box>
+
+            <CloseButton
+              size="sm"
+              onClick={() => setShowError(false)}
+            />
+          </AlertRoot>
         </Box>
       )}
     </Flex>
