@@ -20,6 +20,8 @@ export default function Timer() {
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
 
+  const [initialTime, setInitialTime] = useState<number>(0);
+
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isOvertime, setIsOvertime] = useState(false);
@@ -40,16 +42,41 @@ export default function Timer() {
     }, 5000);
   };
 
+  // Convert input → seconds
+  const getTotalSeconds = () =>
+  hours * 3600 + minutes * 60 + seconds;
+
   // 🔥 start timer
+  // START / RESUME
   const startTimer = () => {
-    if (hours === 0 && minutes === 0 && seconds === 0) {
+    // fresh start validation
+    if (timeLeft === 0 && getTotalSeconds() === 0) {
       showErrorMessage("Provide hours, minutes or seconds.");
       return;
     }
 
-    setTimeLeft(hours * 3600 + minutes * 60 + seconds);
+    // if fresh start
+    if (timeLeft === 0) {
+      const total = getTotalSeconds();
+      setInitialTime(total);
+      setTimeLeft(total);
+    }
+
     setIsOvertime(false);
     setIsRunning(true);
+  };
+
+  // PAUSE
+  const pauseTimer = () => {
+    setIsRunning(false);
+  };
+
+  // STOP / RESET
+  const stopTimer = () => {
+    setIsRunning(false);
+    setTimeLeft(0);
+    setInitialTime(0);
+    setIsOvertime(false);
   };
 
   // 🔥 countdown logic
@@ -155,7 +182,7 @@ export default function Timer() {
           border="1px solid"
           borderColor="whiteAlpha.200"
           w="full"
-          maxW="600px"
+          maxW="700px"
         >
           {/* TIME INPUTS */}
           <Flex gap={4} w="full">
@@ -220,6 +247,19 @@ export default function Timer() {
             </Button>
 
             <Button
+              colorScheme="red"
+              onClick={stopTimer}
+              w={{ base: "full", md: "auto" }}
+              size="lg"
+              fontSize={{ base: "lg", md: "xl" }}
+              px={{ base: 10, md: 8 }}
+              py={{ base: 7, md: 6 }}
+              borderRadius="xl"
+            >
+              Reset
+            </Button>
+
+            <Button
               onClick={toggleFullscreen}
               w={{ base: "full", md: "auto" }}
               size="lg"
@@ -234,14 +274,45 @@ export default function Timer() {
           </Flex>
 
           {/* OVERTIME CHECKBOX */}
-          <Checkbox.Root
-            checked={allowOvertime}
-            onCheckedChange={(d) => setAllowOvertime(!!d.checked)}
+          <Box
+            w="full"
+            display="flex"
+            justifyContent="center"
+            py={2}
           >
-            <Checkbox.HiddenInput />
-            <Checkbox.Control />
-            <Checkbox.Label>Allow Overtime</Checkbox.Label>
-          </Checkbox.Root>
+            <Checkbox.Root
+              checked={allowOvertime}
+              onCheckedChange={(d) => setAllowOvertime(!!d.checked)}
+            >
+              <Flex
+                align="center"
+                gap={3}
+                px={4}
+                py={3}
+                borderRadius="xl"
+                bg="whiteAlpha.100"
+                border="1px solid"
+                borderColor="whiteAlpha.200"
+                _hover={{ bg: "whiteAlpha.200" }}
+                transition="all 0.2s ease"
+                cursor="pointer"
+              >
+                <Checkbox.HiddenInput />
+
+                <Checkbox.Control
+                  boxSize="6"
+                  borderRadius="md"
+                />
+
+                <Checkbox.Label
+                  fontSize="md"
+                  fontWeight="medium"
+                >
+                  Allow Overtime
+                </Checkbox.Label>
+              </Flex>
+            </Checkbox.Root>
+          </Box>
         </VStack>
       )}
 
