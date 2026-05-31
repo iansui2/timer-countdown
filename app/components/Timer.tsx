@@ -165,7 +165,7 @@ export default function Timer() {
 
       {/* TIMER DISPLAY */}
       <Box
-        fontSize={isFullscreen ? "25rem" : { base: "7xl", md: "10rem", lg: "15rem" }}
+        fontSize={isFullscreen ? "25rem" : { base: "9xl", md: "10rem", lg: "15rem" }}
         fontWeight="extrabold"
         lineHeight="1"
         color={isOvertime ? "red.400" : "green.300"}
